@@ -7,8 +7,10 @@ from psycopg2.extras import RealDictCursor
 
 router = APIRouter(prefix="/postgres", tags=["Postgres Data Service"])
 
-def get_db_url() -> Optional[str]:
-    return os.getenv("POSTGRES_URL") or os.getenv("DATABASE_URL")
+DEFAULT_DB_URL = "postgresql://neondb_owner:npg_Vjb4ShC8mgPl@ep-lingering-water-ahzxwzpq-pooler.c-3.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require"
+
+def get_db_url() -> str:
+    return os.getenv("POSTGRES_URL") or os.getenv("DATABASE_URL") or DEFAULT_DB_URL
 
 class PostgresQueryRequest(BaseModel):
     query: str = Field(..., description="Read-only SQL query to execute")
