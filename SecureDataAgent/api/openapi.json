@@ -35,7 +35,7 @@
             "required": false,
             "schema": {
               "type": "string",
-              "default": "company-secure-data-lake",
+              "default": "usefulbi-ma-insights-data",
               "title": "Bucket"
             },
             "description": "Target S3 bucket name"
@@ -79,7 +79,7 @@
             "required": false,
             "schema": {
               "type": "string",
-              "default": "company-secure-data-lake",
+              "default": "usefulbi-ma-insights-data",
               "title": "Bucket"
             },
             "description": "Target S3 bucket name"
