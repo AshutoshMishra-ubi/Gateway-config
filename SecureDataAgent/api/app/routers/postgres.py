@@ -1,12 +1,18 @@
+import os
+from typing import List, Dict, Any, Optional
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
-from typing import List, Dict, Any
+import psycopg2
+from psycopg2.extras import RealDictCursor
 
 router = APIRouter(prefix="/postgres", tags=["Postgres Data Service"])
 
+def get_db_url() -> Optional[str]:
+    return os.getenv("POSTGRES_URL") or os.getenv("DATABASE_URL")
+
 class PostgresQueryRequest(BaseModel):
     query: str = Field(..., description="Read-only SQL query to execute")
-    database: str = Field(default="appdb", description="Database name")
+    database: Optional[str] = Field(default=None, description="Optional target database name")
 
 class PostgresQueryResponse(BaseModel):
     columns: List[str]
@@ -16,25 +22,105 @@ class PostgresQueryResponse(BaseModel):
 class PostgresSchemaResponse(BaseModel):
     tables: List[str]
 
+FORBIDDEN_KEYWORDS = [
+    "INSERT", "UPDATE", "DELETE", "DROP", "ALTER", "CREATE", 
+    "TRUNCATE", "RENAME", "GRANT", "REVOKE", "COMMIT", "ROLLBACK"
+]
+
 @router.post(
     "/query",
     response_model=PostgresQueryResponse,
     operation_id="postgres_execute_read_query",
     summary="Execute read-only SQL query against PostgreSQL",
-    description="Executes a SELECT query against PostgreSQL. DDL and data modification statements are forbidden."
+    description="Executes a SELECT query against PostgreSQL database. Data modification and DDL statements are strictly forbidden."
 )
 def execute_read_query(req: PostgresQueryRequest):
-    cleaned_query = req.query.strip().upper()
-    if not (cleaned_query.startswith("SELECT") or cleaned_query.startswith("WITH")):
-        raise HTTPException(status_code=400, detail="Only read-only SELECT or WITH queries are permitted.")
-    return PostgresQueryResponse(columns=["id", "name"], rows=[], row_count=0)
+    cleaned = req.query.strip()
+    upper = cleaned.upper()
+    
+    # 1. Enforce read-only at syntax level
+    if not (upper.startswith("SELECT") or upper.startswith("WITH")):
+        raise HTTPException(status_code=400, detail="Only read-only queries starting with SELECT or WITH are permitted.")
+    
+    # Check for disallowed mutation keywords
+    words = upper.split()
+    for kw in FORBIDDEN_KEYWORDS:
+        if kw in words:
+            raise HTTPException(status_code=400, detail=f"Query contains prohibited keyword: {kw}")
+            
+    db_url = get_db_url()
+    if not db_url:
+        raise HTTPException(
+            status_code=503, 
+            detail="PostgreSQL connection URL is not configured. Please set POSTGRES_URL environment variable."
+        )
+
+    # 2. Execute against live PostgreSQL database
+    try:
+        conn = psycopg2.connect(db_url, connect_timeout=10)
+        # Set read-only session to enforce database-level safety
+        conn.set_session(readonly=True, autocommit=True)
+        with conn.cursor() as cur:
+            cur.execute(cleaned)
+            if not cur.description:
+                return PostgresQueryResponse(columns=[], rows=[], row_count=0)
+            
+            columns = [col[0] for col in cur.description]
+            raw_rows = cur.fetchall()
+            
+            # Format row data safely for JSON serialization
+            rows = []
+            for row in raw_rows:
+                row_dict = {}
+                for col_name, val in zip(columns, row):
+                    # Convert date/time/numeric objects to str if needed
+                    row_dict[col_name] = str(val) if not isinstance(val, (int, float, bool, str, type(None))) else val
+                rows.append(row_dict)
+                
+            return PostgresQueryResponse(
+                columns=columns,
+                rows=rows,
+                row_count=len(rows)
+            )
+    except psycopg2.Error as e:
+        raise HTTPException(status_code=400, detail=f"Database execution error: {str(e).strip()}")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Database connection error: {str(e).strip()}")
+    finally:
+        if 'conn' in locals() and conn:
+            conn.close()
 
 @router.get(
     "/schema",
     response_model=PostgresSchemaResponse,
     operation_id="postgres_get_schema",
     summary="Get PostgreSQL schema and available tables",
-    description="Returns list of tables available in PostgreSQL."
+    description="Returns list of tables available in PostgreSQL database."
 )
-def get_schema(database: str = "appdb"):
-    return PostgresSchemaResponse(tables=["public.users", "public.organizations", "finance.invoices"])
+def get_schema():
+    db_url = get_db_url()
+    if not db_url:
+        raise HTTPException(
+            status_code=503, 
+            detail="PostgreSQL connection URL is not configured. Please set POSTGRES_URL environment variable."
+        )
+        
+    query = """
+        SELECT table_schema || '.' || table_name AS full_name
+        FROM information_schema.tables 
+        WHERE table_schema NOT IN ('pg_catalog', 'information_schema')
+          AND table_type = 'BASE TABLE'
+        ORDER BY table_schema, table_name;
+    """
+    try:
+        conn = psycopg2.connect(db_url, connect_timeout=10)
+        conn.set_session(readonly=True, autocommit=True)
+        with conn.cursor() as cur:
+            cur.execute(query)
+            tables = [r[0] for r in cur.fetchall()]
+            return PostgresSchemaResponse(tables=tables)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error inspecting database schema: {str(e).strip()}")
+    finally:
+        if 'conn' in locals() and conn:
+            conn.close()
