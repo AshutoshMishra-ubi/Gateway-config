@@ -41,6 +41,8 @@ def read_file(
     bucket: Optional[str] = Query(default=None, description="Target S3 bucket name")
 ):
     target_bucket = bucket if (isinstance(bucket, str) and bucket.strip()) else settings.DEFAULT_S3_BUCKET
+    if target_bucket == "company-secure-data-lake":
+        target_bucket = "usefulbi-ma-insights-data"
     try:
         s3 = get_s3_client()
         response = s3.get_object(Bucket=target_bucket, Key=key)
@@ -66,6 +68,8 @@ def list_files(
     bucket: Optional[str] = Query(default=None, description="Target S3 bucket name")
 ):
     target_bucket = bucket if (isinstance(bucket, str) and bucket.strip()) else settings.DEFAULT_S3_BUCKET
+    if target_bucket == "company-secure-data-lake":
+        target_bucket = "usefulbi-ma-insights-data"
     target_prefix = prefix if isinstance(prefix, str) else ""
     try:
         s3 = get_s3_client()
