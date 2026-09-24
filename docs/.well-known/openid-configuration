@@ -1,0 +1,14 @@
+{
+  "issuer": "https://ashutoshmishra-ubi.github.io/Gateway-config",
+  "jwks_uri": "https://ashutoshmishra-ubi.github.io/Gateway-config/.well-known/jwks.json",
+  "response_types_supported": [
+    "token",
+    "id_token"
+  ],
+  "subject_types_supported": [
+    "public"
+  ],
+  "id_token_signing_alg_values_supported": [
+    "RS256"
+  ]
+}

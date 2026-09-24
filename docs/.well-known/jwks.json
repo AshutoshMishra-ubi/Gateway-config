@@ -1,0 +1,12 @@
+{
+  "keys": [
+    {
+      "kty": "RSA",
+      "alg": "RS256",
+      "use": "sig",
+      "kid": "gateway-permanent-key-1",
+      "n": "sP-tXnRzO0TAszquhPRdT7cjrRab_el3ZnSwXGJ-gu3EbcP33dzPsher-DqhKN0GXRuyrubuRQBFuQtuo68uiBK-Fbg8netOkJ0UK7x9Y0bZxdzRPdKyQZRqq19zgWDPzBbFpukgNwpSIzCT0Mfj2RWyZgN9FX9vHrfjAYn-rFi4-Fxm4W8wgn3f6qhOgtC9VGrD_D73vCU0DxHDfgYgwundSk5hjrk6bydiZVKvS9Cf8dIYdalTUQFD21aPKx-GYD3Ftjer6qTHSYDB9onbbkz8CThq_bZxdIAi9VhYMEd7abzHDvn2M9YuBx3xgqq7OFfSkKLvwQ6xFvWpyloB-Q",
+      "e": "AQAB"
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+.env
+.venv
+
+# Secrets & Private Keys
+*.pem
+private_key.pem
+.env.local
+
+# AgentCore
+.agentcore/
+*.log
+
+# IDE
+.vscode/
+.idea/

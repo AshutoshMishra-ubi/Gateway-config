@@ -51,9 +51,9 @@
       "authorizerType": "CUSTOM_JWT",
       "authorizerConfiguration": {
         "customJwtAuthorizer": {
-          "discoveryUrl": "https://cognito-idp.us-east-1.amazonaws.com/us-east-1_example/.well-known/openid-configuration",
+          "discoveryUrl": "https://ashutoshmishra-ubi.github.io/Gateway-config/.well-known/openid-configuration",
           "allowedAudience": [
-            "example-client-id"
+            "local-test-client"
           ]
         }
       },

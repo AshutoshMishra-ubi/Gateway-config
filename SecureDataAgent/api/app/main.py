@@ -1,9 +1,9 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 try:
-    from app.routers import s3, redshift, postgres
+    from app.routers import s3, redshift, postgres, auth
 except ModuleNotFoundError:
-    from api.app.routers import s3, redshift, postgres
+    from api.app.routers import s3, redshift, postgres, auth
 
 app = FastAPI(
     title="Secure Data Service API",
@@ -25,6 +25,7 @@ app.add_middleware(
 app.include_router(s3.router)
 app.include_router(redshift.router)
 app.include_router(postgres.router)
+app.include_router(auth.router)
 
 @app.get("/health", tags=["System"])
 def health_check():
