@@ -32,7 +32,7 @@ def main():
     print("1. MINTING AUTH TOKEN FOR FINANCE ANALYST")
     print("=" * 70)
     token = get_auth_token(sub="finance-analyst", department="finance")
-    print("✓ Acquired JWT signed with Netlify JWKS (sub=finance-analyst, dept=finance)")
+    print("[OK] Acquired JWT signed with Netlify JWKS (sub=finance-analyst, dept=finance)")
 
     # Setup MCP Streamable HTTP transport
     def create_transport():
@@ -53,7 +53,7 @@ def main():
         tools=[mcp_tool_provider],
         system_prompt="You are an enterprise data analyst. You have access to tools via MCP to fetch data and answer questions accurately."
     )
-    print("✓ Strands Agent ready (Model: Amazon Nova Pro, Tools: Bedrock MCP Gateway)")
+    print("[OK] Strands Agent ready (Model: Amazon Nova Pro, Tools: Bedrock MCP Gateway)")
 
     # Test 1: Authorized Request
     print("\n" + "=" * 70)

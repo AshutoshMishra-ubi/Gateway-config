@@ -32,7 +32,7 @@ def main():
     print("1. MINTING AUTH TOKEN FOR ENGINEERING LEAD")
     print("=" * 70)
     token = get_auth_token(sub="engineering-lead", department="engineering")
-    print("✓ Token acquired (sub=engineering-lead, dept=engineering)")
+    print("[OK] Token acquired (sub=engineering-lead, dept=engineering)")
 
     def create_transport():
         http_client = httpx.AsyncClient(
@@ -55,9 +55,14 @@ You have access to PostgreSQL tools through the MCP Gateway:
 - DataApiTarget___postgres_get_schema: to list database tables
 - DataApiTarget___postgres_execute_read_query: to run SELECT queries
 
+Table definitions:
+- engineering.services: columns (id, service_name, tier, language, health_status, p99_latency_ms)
+- engineering.deployments: columns (deployment_id, service_name, version, status, deployed_at)
+- finance.quarterly_reports: columns (id, fiscal_year, quarter, revenue, net_profit, growth_rate)
+
 When asked about database schemas or data, always use the tools to inspect and query the database accurately."""
     )
-    print("✓ Strands Agent ready with PostgreSQL tools.")
+    print("[OK] Strands Agent ready with PostgreSQL tools.")
 
     # 1. Ask about schema
     print("\n" + "=" * 70)

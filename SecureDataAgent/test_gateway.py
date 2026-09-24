@@ -48,12 +48,14 @@ def test_mcp_call(token: str, tool_name: str, arguments: dict, test_label: str):
     }
     
     try:
-        res = requests.post(f"{GATEWAY_URL}", headers=headers, json=payload, timeout=5)
+        res = requests.post(f"{GATEWAY_URL}", headers=headers, json=payload, timeout=30)
         print(f"Gateway HTTP Status: {res.status_code}")
         try:
             print("Response Body:\n" + json.dumps(res.json(), indent=2))
         except Exception:
             print(f"Raw Response: {res.text}")
+    except requests.exceptions.Timeout:
+        print(f"[-] Gateway request timed out after 30s.")
     except requests.exceptions.ConnectionError:
         print(f"[-] Could not connect to Gateway at {GATEWAY_URL}.")
         print("    Check the port in your 'agentcore dev' terminal output.")
@@ -64,8 +66,8 @@ if __name__ == "__main__":
     test_mcp_call(
         token=finance_token,
         tool_name="DataApiTarget___read_file",
-        arguments={"key": "finance/revenue.csv"},
-        test_label="Finance user reading finance/revenue.csv"
+        arguments={"key": "finance/q3_revenue.csv"},
+        test_label="Finance user reading finance/q3_revenue.csv"
     )
 
     print("\n--- 2. Testing HR User -> Finance Data (EXPECTED: DENY) ---")
@@ -73,6 +75,6 @@ if __name__ == "__main__":
     test_mcp_call(
         token=hr_token,
         tool_name="DataApiTarget___read_file",
-        arguments={"key": "finance/revenue.csv"},
-        test_label="HR user trying to read finance/revenue.csv"
+        arguments={"key": "finance/q3_revenue.csv"},
+        test_label="HR user trying to read finance/q3_revenue.csv"
     )
