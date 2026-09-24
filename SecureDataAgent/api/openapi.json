@@ -1,0 +1,298 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Secure Data Service API",
+    "description": "Enterprise Data Service exposing S3, Redshift, and PostgreSQL tools for AgentCore Gateway.",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8000",
+      "description": "Data API service"
+    }
+  ],
+  "paths": {
+    "/s3/files/{key}": {
+      "get": {
+        "tags": ["S3 Data Service"],
+        "summary": "Read approved file from company S3 storage",
+        "description": "Reads and returns the text content of a file stored in Amazon S3.",
+        "operationId": "read_file",
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Key"
+            },
+            "description": "S3 object key (e.g. finance/revenue.csv)"
+          },
+          {
+            "name": "bucket",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "company-secure-data-lake",
+              "title": "Bucket"
+            },
+            "description": "Target S3 bucket name"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/S3ReadFileResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/s3/files": {
+      "get": {
+        "tags": ["S3 Data Service"],
+        "summary": "List files in S3 bucket with a prefix",
+        "description": "Lists object keys in an S3 bucket matching the specified prefix.",
+        "operationId": "list_files",
+        "parameters": [
+          {
+            "name": "prefix",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "Prefix"
+            },
+            "description": "Key prefix folder path, e.g. finance/"
+          },
+          {
+            "name": "bucket",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "company-secure-data-lake",
+              "title": "Bucket"
+            },
+            "description": "Target S3 bucket name"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/S3ListFilesResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/redshift/query": {
+      "post": {
+        "tags": ["Redshift Data Service"],
+        "summary": "Execute read-only SQL query against Redshift",
+        "description": "Executes a SELECT query against Redshift.",
+        "operationId": "redshift_execute_read_query",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/QueryRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueryResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/redshift/schema": {
+      "get": {
+        "tags": ["Redshift Data Service"],
+        "summary": "Get Redshift schema and available tables",
+        "description": "Returns list of authorized table names and view names.",
+        "operationId": "redshift_get_schema",
+        "parameters": [
+          {
+            "name": "database",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "analytics",
+              "title": "Database"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SchemaResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/postgres/query": {
+      "post": {
+        "tags": ["Postgres Data Service"],
+        "summary": "Execute read-only SQL query against PostgreSQL",
+        "description": "Executes a SELECT query against PostgreSQL.",
+        "operationId": "postgres_execute_read_query",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PostgresQueryRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PostgresQueryResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/postgres/schema": {
+      "get": {
+        "tags": ["Postgres Data Service"],
+        "summary": "Get PostgreSQL schema and available tables",
+        "description": "Returns list of tables available in PostgreSQL.",
+        "operationId": "postgres_get_schema",
+        "parameters": [
+          {
+            "name": "database",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "appdb",
+              "title": "Database"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PostgresSchemaResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "S3ReadFileResponse": {
+        "type": "object",
+        "required": ["bucket", "key", "content"],
+        "properties": {
+          "bucket": { "type": "string" },
+          "key": { "type": "string" },
+          "content": { "type": "string" },
+          "content_type": { "type": "string", "default": "text/plain" }
+        }
+      },
+      "S3ListFilesResponse": {
+        "type": "object",
+        "required": ["bucket", "prefix", "files"],
+        "properties": {
+          "bucket": { "type": "string" },
+          "prefix": { "type": "string" },
+          "files": { "type": "array", "items": { "type": "string" } }
+        }
+      },
+      "QueryRequest": {
+        "type": "object",
+        "required": ["query"],
+        "properties": {
+          "query": { "type": "string" },
+          "database": { "type": "string", "default": "analytics" }
+        }
+      },
+      "QueryResponse": {
+        "type": "object",
+        "required": ["columns", "rows", "row_count"],
+        "properties": {
+          "columns": { "type": "array", "items": { "type": "string" } },
+          "rows": { "type": "array", "items": { "type": "object" } },
+          "row_count": { "type": "integer" }
+        }
+      },
+      "SchemaResponse": {
+        "type": "object",
+        "required": ["tables"],
+        "properties": {
+          "tables": { "type": "array", "items": { "type": "string" } }
+        }
+      },
+      "PostgresQueryRequest": {
+        "type": "object",
+        "required": ["query"],
+        "properties": {
+          "query": { "type": "string" },
+          "database": { "type": "string", "default": "appdb" }
+        }
+      },
+      "PostgresQueryResponse": {
+        "type": "object",
+        "required": ["columns", "rows", "row_count"],
+        "properties": {
+          "columns": { "type": "array", "items": { "type": "string" } },
+          "rows": { "type": "array", "items": { "type": "object" } },
+          "row_count": { "type": "integer" }
+        }
+      },
+      "PostgresSchemaResponse": {
+        "type": "object",
+        "required": ["tables"],
+        "properties": {
+          "tables": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    }
+  }
+}

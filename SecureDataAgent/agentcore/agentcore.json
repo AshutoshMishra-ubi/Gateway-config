@@ -1,0 +1,106 @@
+{
+  "$schema": "https://schema.agentcore.aws.dev/v1/agentcore.json",
+  "name": "SecureDataAgent",
+  "version": 1,
+  "managedBy": "CDK",
+  "tags": {
+    "agentcore:created-by": "agentcore-cli",
+    "agentcore:project-name": "SecureDataAgent"
+  },
+  "runtimes": [
+    {
+      "name": "SecureDataAgent",
+      "build": "CodeZip",
+      "entrypoint": "main.py",
+      "codeLocation": "app/SecureDataAgent/",
+      "runtimeVersion": "PYTHON_3_14",
+      "networkMode": "PUBLIC",
+      "protocol": "HTTP"
+    }
+  ],
+  "memories": [],
+  "knowledgeBases": [],
+  "credentials": [
+    {
+      "authorizerType": "ApiKeyCredentialProvider",
+      "name": "DataApiKey"
+    }
+  ],
+  "evaluators": [],
+  "onlineEvalConfigs": [],
+  "agentCoreGateways": [
+    {
+      "name": "SecureDataAgent",
+      "protocolType": "MCP",
+      "description": "MCP Gateway with CUSTOM_JWT and Cedar Policy Engine",
+      "targets": [
+        {
+          "name": "DataApiTarget",
+          "targetType": "openApiSchema",
+          "schemaSource": {
+            "inline": {
+              "path": "api/openapi.json"
+            }
+          },
+          "outboundAuth": {
+            "type": "API_KEY",
+            "credentialName": "DataApiKey"
+          }
+        }
+      ],
+      "authorizerType": "CUSTOM_JWT",
+      "authorizerConfiguration": {
+        "customJwtAuthorizer": {
+          "discoveryUrl": "https://cognito-idp.us-east-1.amazonaws.com/us-east-1_example/.well-known/openid-configuration",
+          "allowedAudience": [
+            "example-client-id"
+          ]
+        }
+      },
+      "enableSemanticSearch": true,
+      "exceptionLevel": "NONE",
+      "policyEngineConfiguration": {
+        "policyEngineName": "DataAccessPolicyEngine",
+        "mode": "LOG_ONLY"
+      }
+    }
+  ],
+  "policyEngines": [
+    {
+      "name": "DataAccessPolicyEngine",
+      "description": "Cedar Policy Engine enforcing department-level data segregation",
+      "policies": [
+        {
+          "name": "FinanceReadPolicy",
+          "description": "Permit finance users to access finance data",
+          "statement": "permit (\n    principal,\n    action == AgentCore::Action::\"DataApiTarget___read_file\",\n    resource\n)\nwhen {\n    principal has tag \"department\" &&\n    principal.getTag(\"department\") == \"finance\" &&\n    context.input.key startsWith \"finance/\"\n};",
+          "sourceFile": "agentcore/policies/finance.cedar",
+          "validationMode": "FAIL_ON_ANY_FINDINGS",
+          "enforcementMode": "ACTIVE"
+        },
+        {
+          "name": "EngineeringReadPolicy",
+          "description": "Permit engineering users to access engineering data",
+          "statement": "permit (\n    principal,\n    action == AgentCore::Action::\"DataApiTarget___read_file\",\n    resource\n)\nwhen {\n    principal has tag \"department\" &&\n    principal.getTag(\"department\") == \"engineering\" &&\n    context.input.key startsWith \"engineering/\"\n};",
+          "sourceFile": "agentcore/policies/engineering.cedar",
+          "validationMode": "FAIL_ON_ANY_FINDINGS",
+          "enforcementMode": "ACTIVE"
+        },
+        {
+          "name": "HRReadPolicy",
+          "description": "Permit HR users to access HR data",
+          "statement": "permit (\n    principal,\n    action == AgentCore::Action::\"DataApiTarget___read_file\",\n    resource\n)\nwhen {\n    principal has tag \"department\" &&\n    principal.getTag(\"department\") == \"hr\" &&\n    context.input.key startsWith \"hr/\"\n};",
+          "sourceFile": "agentcore/policies/hr.cedar",
+          "validationMode": "FAIL_ON_ANY_FINDINGS",
+          "enforcementMode": "ACTIVE"
+        }
+      ]
+    }
+  ],
+  "configBundles": [],
+  "abTests": [],
+  "harnesses": [],
+  "datasets": [],
+  "capacityProviders": [],
+  "payments": []
+}
