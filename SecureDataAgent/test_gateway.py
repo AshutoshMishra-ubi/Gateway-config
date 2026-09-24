@@ -7,9 +7,14 @@ import requests
 import json
 import sys
 
-# Local API and Gateway ports
-API_BASE_URL = "http://127.0.0.1:8000"
-GATEWAY_URL = "http://localhost:8080" # Default agentcore dev port
+import os
+
+# Production Render API and Live AWS Bedrock MCP Gateway
+API_BASE_URL = "https://gateway-config.onrender.com"
+GATEWAY_URL = os.getenv(
+    "BEDROCK_GATEWAY_URL",
+    "https://securedatagatewaylive-s2oqsogine.gateway.bedrock-agentcore.us-east-1.amazonaws.com/mcp"
+)
 
 def get_token(department: str, username: str = "test-user") -> str:
     """Mint a signed JWT from our local auth endpoint with the specified department."""
@@ -55,19 +60,19 @@ def test_mcp_call(token: str, tool_name: str, arguments: dict, test_label: str):
 
 if __name__ == "__main__":
     print("--- 1. Testing Finance User -> Finance Data (EXPECTED: ALLOW) ---")
-    finance_token = get_token("finance", "alice")
+    finance_token = get_token("finance", "finance-alice")
     test_mcp_call(
         token=finance_token,
-        tool_name="read_file",
+        tool_name="DataApiTarget___read_file",
         arguments={"key": "finance/revenue.csv"},
         test_label="Finance user reading finance/revenue.csv"
     )
 
     print("\n--- 2. Testing HR User -> Finance Data (EXPECTED: DENY) ---")
-    hr_token = get_token("hr", "bob")
+    hr_token = get_token("hr", "hr-bob")
     test_mcp_call(
         token=hr_token,
-        tool_name="read_file",
+        tool_name="DataApiTarget___read_file",
         arguments={"key": "finance/revenue.csv"},
         test_label="HR user trying to read finance/revenue.csv"
     )

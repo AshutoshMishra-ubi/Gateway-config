@@ -7,8 +7,8 @@
   },
   "servers": [
     {
-      "url": "https://outdoor-date-episode-charms.trycloudflare.com",
-      "description": "Live Data API Service"
+      "url": "https://gateway-config.onrender.com",
+      "description": "Production Data API Service"
     }
   ],
   "paths": {

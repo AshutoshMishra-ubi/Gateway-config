@@ -3,10 +3,6 @@
   "name": "SecureDataAgent",
   "version": 1,
   "managedBy": "CDK",
-  "tags": {
-    "agentcore:created-by": "agentcore-cli",
-    "agentcore:project-name": "SecureDataAgent"
-  },
   "runtimes": [
     {
       "name": "SecureDataAgent",
@@ -22,8 +18,11 @@
   "knowledgeBases": [],
   "credentials": [
     {
-      "authorizerType": "ApiKeyCredentialProvider",
-      "name": "DataApiKey"
+      "authorizerType": "OAuthCredentialProvider",
+      "name": "DataOAuth",
+      "vendor": "CustomOauth2",
+      "managed": false,
+      "usage": "outbound"
     }
   ],
   "evaluators": [],
@@ -43,8 +42,8 @@
             }
           },
           "outboundAuth": {
-            "type": "API_KEY",
-            "credentialName": "DataApiKey"
+            "type": "OAUTH",
+            "credentialName": "DataOAuth"
           }
         }
       ],

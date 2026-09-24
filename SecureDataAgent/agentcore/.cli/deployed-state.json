@@ -1,3 +1,13 @@
 {
-  "targets": {}
+  "targets": {
+    "dev": {
+      "resources": {
+        "credentials": {
+          "DataOAuth": {
+            "credentialProviderArn": "arn:aws:bedrock-agentcore:us-east-1:025066239748:token-vault/default"
+          }
+        }
+      }
+    }
+  }
 }
