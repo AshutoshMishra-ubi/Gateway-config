@@ -51,7 +51,7 @@
       "authorizerType": "CUSTOM_JWT",
       "authorizerConfiguration": {
         "customJwtAuthorizer": {
-          "discoveryUrl": "https://ashutoshmishra-ubi.github.io/Gateway-config/.well-known/openid-configuration",
+          "discoveryUrl": "https://coruscating-croissant-490115.netlify.app/.well-known/openid-configuration",
           "allowedAudience": [
             "local-test-client"
           ]

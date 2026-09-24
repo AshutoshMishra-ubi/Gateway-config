@@ -7,8 +7,8 @@
   },
   "servers": [
     {
-      "url": "http://localhost:8000",
-      "description": "Data API service"
+      "url": "https://outdoor-date-episode-charms.trycloudflare.com",
+      "description": "Live Data API Service"
     }
   ],
   "paths": {

@@ -1,6 +1,6 @@
 {
-  "issuer": "https://ashutoshmishra-ubi.github.io/Gateway-config",
-  "jwks_uri": "https://ashutoshmishra-ubi.github.io/Gateway-config/.well-known/jwks.json",
+  "issuer": "https://coruscating-croissant-490115.netlify.app",
+  "jwks_uri": "https://coruscating-croissant-490115.netlify.app/.well-known/jwks.json",
   "response_types_supported": [
     "token",
     "id_token"

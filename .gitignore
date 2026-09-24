@@ -22,3 +22,6 @@ private_key.pem
 # IDE
 .vscode/
 .idea/
+
+# Local Netlify folder
+.netlify
